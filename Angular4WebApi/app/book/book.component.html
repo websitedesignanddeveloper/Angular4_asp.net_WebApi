@@ -1,0 +1,220 @@
+﻿<style type="text/css">
+    input.ng-invalid.ng-dirty.ng-touched {
+        border: 2px solid Red;
+        border-left: 5px solid #a94442;
+    }
+
+    /*valid and required show green*/
+    .ng-valid[required] {
+        border-left: 5px solid #42A948;
+    }
+
+    .error {
+        padding: 12px;
+        background-color: rgba(255, 0, 0, 0.2);
+        color: red;
+    }
+
+    #spinner {
+        background-color: rgba(49, 37, 37, 0.2);
+        border-radius: 6px;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        content: " ";
+        text-align: center;
+        z-index: 9999;
+        /*Center Div*/
+        /* Safari, Opera, and Chrome */
+        display: -webkit-box;
+        -webkit-box-pack: center;
+        -webkit-box-align: center;
+        /* Firefox */
+        display: -moz-box;
+        -moz-box-pack: center;
+        -moz-box-align: center;
+        /* Internet Explorer 10 */
+        display: -ms-flexbox;
+        -ms-flex-pack: center;
+        -ms-flex-align: center;
+    }
+
+    .lblTextLeft {
+        display: block;
+        text-align: left;
+    }
+</style>
+
+<div *ngIf="isLoadingData" style="text-align:center" id="spinner">
+    <img src="./Content/page-loader.gif" />
+</div>
+<br />
+<button type="button" (click)="addBookDialog()" pButton icon="fa-external-link-square" label="Add Book"></button>
+
+<div style="padding-top:50px">
+    <p-dataTable [value]="books" [responsive]="true" [rows]="10" [paginator]="true">
+        <p-column field="Id" hidden="hidden"></p-column>
+        <p-column field="Name" header="Name" sortable="true"  filterPlaceholder="Search"></p-column>
+        <p-column field="Category" header="Category" sortable="true"  filterPlaceholder="Search"></p-column>
+		<p-column field="Author" header="Author" sortable="true"  filterPlaceholder="Search"></p-column>
+        <p-column field="Price" header="Price" sortable="true"  filterPlaceholder="Search"></p-column>
+        <p-column>
+            <ng-template let-book="rowData" pTemplate="body" >
+                <button type="button" pButton (click)="editBook(book)" icon="fa-pencil-square-o"></button>
+                <button type="button" pButton (click)="deleteBook(book)" icon="fa-times"></button>
+            </ng-template>
+        </p-column>
+    </p-dataTable>
+</div>
+
+<p-dialog header="Add Book" [(visible)]="displayAddDialog" modal="true" width="450" height="450">
+    <!-- Add Book :Using 'Reactive Forms' approach-->
+    <form #addBookForm="ngForm" [formGroup]="addBookFG" class="form-horizontal" style="width:400px;height:400px">
+        <div *ngIf="isAdd">
+            <fieldset>
+                <div class="form-group">
+                    <label class="col-md-1 control-label lblTextLeft" for="name">Name</label>
+                    <div class="col-md-12">
+                        <input id="name" name="name" type="text" placeholder="Book Name" class="form-control input-md"
+                               formControlName="name" [(ngModel)]="book.Name" >
+
+                        <div *ngIf="addBookFG.get('name').hasError('required') && (addBookFG.get('name').dirty || addBookFG.get('name').touched)">
+                            <span class="text-danger glyphicon glyphicon-alert">Name is required</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="category">Category</label>
+                    <div class="col-md-12">
+                        <input id="category" name="category" type="text" placeholder="Book Category" class="form-control input-md"
+                               formControlName="category" required [(ngModel)]="book.Category" />
+
+                        <div *ngIf="addBookFG.get('category').touched && addBookFG.get('category').hasError('required')">
+                            <span class="text-danger glyphicon glyphicon-alert">Category is required</span>
+                        </div>
+ 
+                    </div>
+                </div>
+
+				<div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="author">Author</label>
+                    <div class="col-md-12">
+                        <input id="author" name="author" type="text" placeholder="Book Author" class="form-control input-md"
+                               formControlName="author" required [(ngModel)]="book.Author" />
+
+                        <div *ngIf="addBookFG.get('author').touched && addBookFG.get('author').hasError('required')">
+                            <span class="text-danger glyphicon glyphicon-alert">Author is required</span>
+                        </div>
+ 
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="price">Price</label>
+                    <div class="col-md-12">
+                        <input id="price" name="price" type="number" placeholder="Book Price" class="form-control input-md"
+                               formControlName="price" required [(ngModel)]="book.Price" />
+
+                        <div *ngIf="addBookFG.get('price').touched && addBookFG.get('price').hasError('required')">
+                            <span class="text-danger glyphicon glyphicon-alert">Price is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label"></label>
+                    <div class="col-md-12">
+                        <button type="button" id="btnSave" name="btnSave" class="btn btn-primary" [disabled]="!addBookFG.valid"
+                                (click)="addBook(book);addBookForm.reset();">
+                            <span class="glyphicon glyphicon-floppy-disk"></span>
+                            Save
+                        </button>
+                        <button id="btnCancel" name="btnCancel" class="btn btn-warning" (click)="clearData();addBookForm.reset();">
+                            <span class="glyphicon glyphicon-floppy-remove"></span>Cancel
+                        </button>
+                        <br />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </form>
+</p-dialog>
+<br />
+
+<p-dialog header="Edit Book" [(visible)]="displayEditDialog" modal="true" width="450" height="450">
+    <!-- Edit Book :Using 'Reactive Forms' approach-->
+    <form #editBookForm="ngForm" [formGroup]="editBookFG" class="form-horizontal" style="width:400px;height:400px">
+        <div *ngIf="isEdit">
+            <fieldset>
+                <div class="form-group">
+                    <label class="col-md-1 control-label lblTextLeft" for="name">Name</label>
+                    <div class="col-md-12">
+                        <input id="name" name="name" type="text" placeholder="book Name" class="form-control input-md"
+                               formControlName="name" [(ngModel)]="book.Name"/>
+
+                        <div *ngIf="editBookFG.get('name').hasError('required') && (editBookFG.get('name').dirty || editBookFG.get('name').touched)">
+                            <span class="text-danger glyphicon glyphicon-alert">Name is required</span>
+                        </div>
+ 
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="category">Category</label>
+                    <div class="col-md-12">
+                        <input id="category" name="category" type="text" placeholder="Book Category" class="form-control input-md"
+                               formControlName="category" required [(ngModel)]="book.Category" />
+
+                        <div *ngIf="editBookFG.get('category').touched && editBookFG.get('category').hasError('required')">
+                            <span class="text-danger glyphicon glyphicon-alert">Category is required</span>
+                        </div>
+                     
+                    </div>
+                </div>
+
+				<div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="author">Author</label>
+                    <div class="col-md-12">
+                        <input id="author" name="author" type="text" placeholder="Book Author" class="form-control input-md"
+                               formControlName="author" required [(ngModel)]="book.Author" />
+
+                        <div *ngIf="editBookFG.get('author').touched && editBookFG.get('author').hasError('required')">
+                            <span class="text-danger glyphicon glyphicon-alert">Author is required</span>
+                        </div>
+ 
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="price">Price</label>
+                    <div class="col-md-12">
+                        <input id="price" name="price" type="number" placeholder="Book Price" class="form-control input-md"
+                               formControlName="price" required [(ngModel)]="book.Price" />
+
+                        <div *ngIf="editBookFG.get('price').touched && editBookFG.get('price').hasError('required')">
+                            <span class="text-danger glyphicon glyphicon-alert">Price is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label"></label>
+                    <div class="col-md-12">
+                        <button id="btnSave" name="btnSave" class="btn btn-primary"
+                                type="submit" [disabled]="!editBookFG.valid" (click)="updateBook(book);editBookForm.reset();">
+                            <span class="glyphicon glyphicon-floppy-disk"></span>
+                            Save
+                        </button>
+                        <button id="btnCancel" name="btnCancel" class="btn btn-warning" (click)="clearData();editBookForm.reset();">
+                            <span class="glyphicon glyphicon-floppy-remove"></span>Cancel
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </form>
+</p-dialog>
